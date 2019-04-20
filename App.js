@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-import { StyleSheet, TextInput, Text, View, FlatList, ImageBackground } from "react-native";
+import { StyleSheet, TextInput, Text, View, FlatList, ImageBackground, Keyboard } from "react-native";
 import axios from 'axios';
 
-const url = "https://api.themoviedb.org/3/genre/movie/list?api_key=168cd3b806908239f3dae5d2a19ee51d";
+const genreurl = "https://api.themoviedb.org/3/genre/movie/list?api_key=168cd3b806908239f3dae5d2a19ee51d";
 const popularurl = "https://api.themoviedb.org/3/movie/popular?api_key=168cd3b806908239f3dae5d2a19ee51d&language=en-US&page=1";
 
 export default class App extends Component {
@@ -11,28 +11,50 @@ export default class App extends Component {
     super(props);
     this.state = {
       searchContent: '',
-      popularmovies: []
+      popularMovies: [],
+      isKeyboard: false,
+      searchQuery: ''
+
     };
 
   }
 
   componentDidMount() {
     axios.get(popularurl).then(({ data }) => {
-      this.setState({ popularmovies: data.results })
+      this.setState({ popularMovies: data.results })
     }
 
     ).catch((error) => alert(error));
+    this.keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      this._keyboardDidShow,
+    );
+    this.keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      this._keyboardDidHide,
+    );
+  }
+
+  _keyboardDidShow = () => {
+
+    this.setState({ isKeyboard: true });
+  }
+
+  _keyboardDidHide = () => {
+    this.setState({ isKeyboard: false });
 
   }
-  renderCard = (item) => {
+
+  renderCard = (item, key) => {
     return (
-      <View style={styles.card}>
+      <View style={styles.card} key={item.id}>
         <ImageBackground
-          style={{ width: '100%', height: '100%' }}
+          style={{ width: '100%', height: '100%', }}
+          imageStyle={{ resizeMode: 'cover',backgroundColor:'black',opacity:0.5 }}
           source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}` }}
         >
-          <View style={{ flex: 1,justifyContent:'center',borderWidth:4,alignItems:'center'}}>
-            <Text style={{ textAlign: 'center', color: 'white', fontWeight: '900', fontSize: 18,height:"100%" }}>{item.title}</Text>
+          <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 5 }}>
+            <Text style={{ textAlign: 'center', color: 'white', fontWeight: '900', fontSize: 16 }}>{item.title}</Text>
           </View>
         </ImageBackground>
       </View>
@@ -60,16 +82,20 @@ export default class App extends Component {
 
           />
         </View>
-        <View style={{ marginTop: 10 }}>
-          <Text style={{ marginLeft:10,fontSize: 18, fontWeight: "800" }}>Popular Movies</Text>
-        </View>
-        <View style={{ marginTop: 15 }}>
-          <FlatList
-            data={this.state.popularmovies}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            renderItem={(({ item }) => this.renderCard(item))}
-          />
+        <View style={[styles.containerinside, this.state.isKeyboard ? styles.translucent : styles.transparent]}>
+          <View style={{ marginTop: 10 }}>
+            <Text style={{ marginLeft: 10, fontSize: 18, fontWeight: "800", color: 'black' }}>Popular Movies</Text>
+          </View>
+          <View style={{ marginTop: 15 }}>
+            <FlatList
+              data={this.state.popularMovies}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={(({ item }) => this.renderCard(item))}
+            />
+
+          </View>
 
         </View>
 
@@ -80,7 +106,7 @@ export default class App extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
   },
   searchContainer: {
     width: "100%",
@@ -89,7 +115,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#9e9e9e',
-    elevation: 5
+    elevation: 2
   },
   card: {
     height: 150,
@@ -98,6 +124,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: 'black',
     color: 'black'
+  },
+  containerinside: {
+    flex: 1
+  },
+  transparent: {
+    backgroundColor: 'transparent',
+    opacity: 1
+  },
+  translucent: {
+    backgroundColor: 'black',
+    opacity: 0.5
   }
 });
 
