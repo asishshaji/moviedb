@@ -4,9 +4,13 @@ import axios from 'axios';
 import { SearchBar } from 'react-native-elements';
 import { createStackNavigator, createAppContainer } from "react-navigation";
 import MovieDetails from './src/screens/MovieDetails';
+import SearchResults from "./src/screens/SearchResults";
+import CardView from './src/components/CardView';
 
-const genreurl = "https://api.themoviedb.org/3/genre/movie/list?api_key=168cd3b806908239f3dae5d2a19ee51d";
-const popularurl = "https://api.themoviedb.org/3/movie/popular?api_key=168cd3b806908239f3dae5d2a19ee51d&language=en-US&page=1";
+
+
+const genreURL = "https://api.themoviedb.org/3/genre/movie/list?api_key=168cd3b806908239f3dae5d2a19ee51d";
+const popularURL = "https://api.themoviedb.org/3/movie/popular?api_key=168cd3b806908239f3dae5d2a19ee51d&language=en-US&page=1";
 
 class App extends Component {
 
@@ -26,8 +30,21 @@ class App extends Component {
 
   }
 
+  renderSeparator = () => {
+    return (
+      <View
+        style={{
+          height: 1,
+          width: "86%",
+          backgroundColor: "#CED0CE",
+          marginLeft: "14%"
+        }}
+      />
+    );
+  };
+
   componentDidMount() {
-    axios.get(popularurl).then(({ data }) => {
+    axios.get(popularURL).then(({ data }) => {
       this.setState({ popularMovies: data.results })
     }
 
@@ -50,28 +67,6 @@ class App extends Component {
   _keyboardDidHide = () => {
     this.setState({ isKeyboard: false });
 
-  }
-
-  renderCard = (item, key) => {
-    return (
-      <TouchableOpacity activeOpacity={0} onPress={() => this.props.navigation.navigate(
-        'MovieDetails', {
-          item: item
-        }
-      )}>
-        <View style={styles.card} key={item.id}>
-          <ImageBackground
-            style={{ width: '100%', height: '100%', }}
-            imageStyle={{ resizeMode: 'cover', backgroundColor: 'black', opacity: 0.7 }}
-            source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}` }}
-          >
-            <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 5 }}>
-              <Text style={{ textAlign: 'center', color: 'white', fontWeight: '900', fontSize: 16 }}>{item.title}</Text>
-            </View>
-          </ImageBackground>
-        </View>
-      </TouchableOpacity>
-    )
   }
 
 
@@ -102,9 +97,11 @@ class App extends Component {
             <FlatList
               data={this.state.popularMovies}
               horizontal={true}
+              initialNumToRender = {5}
+              ItemSeparatorComponent={() => <View style={{ width: 6, height: "100%", backgroundColor: 'white' }} />}
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={(({ item }) => this.renderCard(item))}
+              renderItem={(({ item }) => <CardView item={item} fontSize={20} customprops={this.props} itemid={item.id} poster_path={item.poster_path} title={item.title} />)}
             />
 
           </View>
@@ -120,6 +117,7 @@ const AppNavigator = createStackNavigator(
   {
     Home: App,
     MovieDetails: MovieDetails,
+    Results: SearchResults
   },
   {
     initialRouteName: "Home"
