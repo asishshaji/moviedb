@@ -11,7 +11,7 @@ import {
 const common = (item) => <View style={styles.card} key={item.itemid}>
     <ImageBackground
         style={{ width: '100%', height: '100%', }}
-        imageStyle={{ resizeMode: 'cover', backgroundColor: 'black', opacity: 0.7 }}
+        imageStyle={{ resizeMode: 'cover', backgroundColor: 'black', opacity: 0.7,borderRadius:5 }}
         source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}` }}
     >
         <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 5 }}>
@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
         borderColor: 'white',
         borderWidth: 1,
         backgroundColor: 'black',
-        color: 'black'
+        color: 'black',
+        borderRadius:10
     }
 });
